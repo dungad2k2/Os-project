@@ -74,7 +74,7 @@ struct token_s *tokenize(struct source_s *src)
         return &eof_token;
     }
     
-    if(!tok_buf)
+    if(!tok_buf) //allocating memory for our token buffer
     {
         tok_bufsize = 1024;
         tok_buf = malloc(tok_bufsize);
@@ -84,7 +84,7 @@ struct token_s *tokenize(struct source_s *src)
             return &eof_token;
         }
     }
-
+    
     tok_bufindex     = 0;
     tok_buf[0]       = '\0';
 

@@ -3,6 +3,9 @@
 #include<errno.h>
 #include<string.h>
 #include "shell.h"
+#include "parser.h"
+#include "source.h"
+#include "executor.h"
 char *read_cmd(void){
     char buf[1024];
     char *ptr = NULL;
@@ -40,6 +43,23 @@ char *read_cmd(void){
     }
     return ptr;
 }
+int parse_and_execute(struct source_s *src){
+    skip_white_spaces(src);
+    struct token_s *tok = tokenize(src);
+    if(tok == &eof_token){
+        return 0;
+    }
+    while(tok && tok!= &eof_token){
+        struct node_s *cmd = parse_simple_command(tok);
+        if (!cmd){
+            break;
+        }
+        do_simple_command(cmd);
+        free_node_tree(cmd);
+        tok = tokenize(src);
+    }
+    return 1;
+}
 int main(int argc, char **argv){
     char *cmd;
     do {
@@ -56,7 +76,11 @@ int main(int argc, char **argv){
             free(cmd);
             break;
         }
-        printf("%s\n",cmd);
+        struct source_s src;
+        src.buffer = cmd;
+        src.bufsize = strlen(cmd);
+        src.curpos = INIT_SRC_POS;
+        parse_and_execute(&src);
         free(cmd);
     } while(1);
     exit(EXIT_SUCCESS);
